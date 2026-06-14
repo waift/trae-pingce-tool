@@ -99,6 +99,29 @@
       "content": "0 致命bug无法启动/崩溃/卡死/点击没反应\n1 能运行但核心功能有明显缺失或异常\n2 核心循环可整局跑完，仅1~2个小瑕疵\n3 零Bug，反复多局测试均稳定"
     }
   ],
-  "evaluators": [],
-  "links": []
+  "evaluators": [
+    {
+      "id": "e_mqdq4pujp33nvq",
+      "name": "wby",
+      "token": "8l841k"
+    }
+  ],
+  "links": [
+    {
+      "id": "l_mqdq4pujphf8ru",
+      "evaluatorId": "e_mqdq4pujp33nvq",
+      "productIds": [
+        "p_mqdpwbjixcynwl",
+        "p_mqdpwh4kx5kel5",
+        "p_mqdpwmc9d7o4kq"
+      ],
+      "questionIds": [
+        "q_mqdprlpdb6bz55",
+        "q_mqdpskwm8x1uth",
+        "q_mqdpt9e1z9v4ab"
+      ],
+      "token": "8l841k",
+      "status": "pending"
+    }
+  ]
 }
