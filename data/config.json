@@ -3,8 +3,8 @@
     {
       "id": "q_mqdprlpdb6bz55",
       "category": "basic",
-      "name": "",
-      "prompt": "",
+      "name": "旅行餐车",
+      "prompt": "做一个合成经营游戏。5×5网格为操作区，玩家自由拖拽物品，两个相同ID物品拖到一起合并升级为下一级（Merge-2机制）。右侧/顶部显示订单需求（需要某等级物品），合成出指定物品后提交订单获星星。网格满时无法生成新物品（从队列/刷新获取新物品放入空格）。通过完成订单推进关卡。画风温馨休闲旅行主题，卡通扁平马卡龙配色，圆润可爱的食材/餐具图标，浅色木纹背景。合成时有清脆\"叮\"音，提交订单有收银机音效，背景轻快BGM",
       "order": 1,
       "isStem": false,
       "stemId": null,
@@ -14,8 +14,8 @@
     {
       "id": "q_mqdpskwm8x1uth",
       "category": "basic",
-      "name": "",
-      "prompt": "",
+      "name": "极简合成",
+      "prompt": "做个合成游戏，有音效",
       "order": 2,
       "isStem": false,
       "stemId": null,
