@@ -1216,7 +1216,15 @@ body {
         });
       });
       if (!allScored) {
-        incomplete.push(q.name);
+        // 构造可辨识的题目名称
+        var displayName = q.name || '(未命名题目)';
+        if (q.category === 'multi_round' && !q.isStem && q.stemId) {
+          var stem = questions.find(function(sq) { return sq.id === q.stemId; });
+          var stemName = stem ? (stem.name || '(未命名题干)') : '(未知题干)';
+          var roundName = q.roundAction ? q.roundAction : '第' + (q.roundIndex || '?') + '轮';
+          displayName = stemName + ' - ' + roundName;
+        }
+        incomplete.push(displayName);
       }
     });
 
