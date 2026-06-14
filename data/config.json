@@ -78,13 +78,13 @@
       "id": "s_mqdpxbsr9vwya9",
       "category": "basic",
       "dimension": "功能",
-      "content": ""
+      "content": "0 致命bug无法启动/崩溃/卡死/点击没反应\n1 能运行但核心功能有明显缺失或异常\n2 核心循环可整局跑完，仅1~2个小瑕疵\n3 零Bug，反复多局测试均稳定"
     },
     {
       "id": "s_mqdpxgnekw955n",
       "category": "basic",
       "dimension": "视觉",
-      "content": ""
+      "content": "0 致命bug无法启动/崩溃/卡死/点击没反应\n1 能运行但核心功能有明显缺失或异常\n2 核心循环可整局跑完，仅1~2个小瑕疵\n3 零Bug，反复多局测试均稳定"
     },
     {
       "id": "s_mqdpxunrnv2263",
