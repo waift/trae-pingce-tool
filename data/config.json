@@ -26,7 +26,7 @@
       "id": "q_mqdpt9e1z9v4ab",
       "category": "multi_round",
       "name": "",
-      "prompt": "",
+      "prompt": "做个水果三消游戏，8x8的格子，点击两个相邻水果交换位置，3个以上同类水果连成一排就消除，消除后上面的水果掉下来补位。要有分数显示和连击combo效果（combo越高分数倍率越大）。加60秒倒计时，最后10秒数字变红闪烁。如果交换后没有形成消除要自动换回去。4连消除生成一个横向炸弹水果，5连生成彩虹水果可消除全部同色。底部显示3个道具按钮：锤子（点击消除单个水果）、刷新（打乱全部水果位置）、时间+15秒。交换有滑动音，消除有水果碎裂声，combo连击音调递升，倒计时最后10秒有心跳音效，道具使用各有独立音效",
       "order": 1,
       "isStem": true,
       "stemId": null,
@@ -37,23 +37,23 @@
       "id": "q_mqdptr5eh6nqre",
       "category": "multi_round",
       "name": "",
-      "prompt": "",
+      "prompt": "加特殊道具，4连消除生成一个横向炸弹水果，5连生成彩虹水果可消除全部同色。",
       "order": 0,
       "isStem": false,
       "stemId": "q_mqdpt9e1z9v4ab",
       "roundIndex": 1,
-      "roundAction": ""
+      "roundAction": "轮1：改玩法"
     },
     {
       "id": "q_mqdpuas3j0xoyy",
       "category": "multi_round",
       "name": "",
-      "prompt": "",
+      "prompt": "把所有元素图标换成宝石主题，每种颜色对应不同切割形状（圆形、椭圆、水滴、八角、心形），要有高光反射和内部折射效果",
       "order": 0,
       "isStem": false,
       "stemId": "q_mqdpt9e1z9v4ab",
       "roundIndex": 2,
-      "roundAction": ""
+      "roundAction": "轮2：改美术素材"
     }
   ],
   "products": [],
