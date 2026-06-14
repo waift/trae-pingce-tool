@@ -97,6 +97,12 @@
       "category": "multi_round",
       "dimension": "理解",
       "content": ""
+    },
+    {
+      "id": "s_mqdpxy69klqq3k",
+      "category": "multi_round",
+      "dimension": "质量",
+      "content": ""
     }
   ],
   "evaluators": [],
