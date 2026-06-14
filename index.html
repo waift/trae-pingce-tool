@@ -1,0 +1,2477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI办公软件测评管理平台（云端版）</title>
+<style>
+:root {
+  --primary: #4361ee;
+  --primary-hover: #3a56d4;
+  --danger: #e74c3c;
+  --danger-hover: #c0392b;
+  --sidebar-bg: #1a1a2e;
+  --sidebar-hover: #16213e;
+  --sidebar-active: #0f3460;
+  --bg: #f5f6fa;
+  --white: #ffffff;
+  --text: #2d3436;
+  --text-light: #636e72;
+  --border: #dfe6e9;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  min-height: 100vh;
+  background: var(--sidebar-bg);
+  color: #fff;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  padding: 20px 16px;
+  font-size: 16px;
+  font-weight: 700;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 0;
+}
+
+.nav-item {
+  padding: 14px 20px;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  user-select: none;
+}
+
+.nav-item:hover { background: var(--sidebar-hover); }
+.nav-item.active { background: var(--sidebar-active); font-weight: 600; }
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+/* Main */
+.main {
+  margin-left: 200px;
+  flex: 1;
+  min-height: 100vh;
+  padding: 24px 32px;
+}
+
+.page { display: none; }
+.page.active { display: block; }
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border: none;
+  border-radius: var(--radius);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  text-decoration: none;
+}
+
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover { background: var(--danger-hover); }
+.btn-sm { padding: 5px 12px; font-size: 13px; }
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+
+/* Table */
+.table-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  background: #f8f9fa;
+  font-weight: 600;
+  color: var(--text-light);
+  font-size: 13px;
+}
+
+tr:nth-child(even) td { background: #fafbfc; }
+tr:hover td { background: #f0f2ff; }
+
+.actions { display: flex; gap: 8px; }
+
+/* Section */
+.section {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Indent for sub-items */
+.indent-row td:first-child { padding-left: 40px; }
+.stem-label {
+  display: inline-block;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-left: 6px;
+}
+
+.round-badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-right: 6px;
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-overlay.show { display: flex; }
+
+.modal {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  width: 520px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: var(--text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.form-group textarea { resize: vertical; min-height: 60px; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border);
+}
+
+.tab {
+  padding: 10px 24px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.tab:hover { color: var(--primary); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+/* Standards toolbar */
+.std-toolbar {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.new-dim-input {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  width: 180px;
+}
+
+.new-dim-input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+/* Standards dimension list */
+.std-list-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.std-dim-row {
+  display: flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  background: var(--white);
+}
+
+.std-dim-row:last-child {
+  border-bottom: 1px solid var(--border);
+}
+
+.std-dim-name {
+  width: 120px;
+  min-width: 120px;
+  padding: 12px 14px;
+  font-weight: 600;
+  font-size: 14px;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  border-right: 1px solid var(--border);
+}
+
+.std-dim-name .dim-name-text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.std-dim-name .dim-name-input {
+  width: 100%;
+  border: 1px solid var(--primary);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  background: #fff;
+}
+
+.std-dim-name .dim-name-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+}
+
+.std-dim-content {
+  flex: 1;
+  padding: 6px;
+  display: flex;
+  align-items: stretch;
+}
+
+.std-dim-content textarea {
+  width: 100%;
+  min-height: 60px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  resize: vertical;
+  font-size: 13px;
+  font-family: inherit;
+  padding: 6px 10px;
+  line-height: 1.5;
+  background: transparent;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.std-dim-content textarea:hover {
+  border-color: var(--border);
+  background: #fafbfc;
+}
+
+.std-dim-content textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: #fff;
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.1);
+}
+
+.std-dim-actions {
+  width: 120px;
+  min-width: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-left: 1px solid var(--border);
+  background: #fafbfc;
+}
+
+.std-empty-hint {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-light);
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-bar select {
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+/* Status badge */
+.status-badge {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+.status-pending { background: #f0f0f0; color: #636e72; }
+.status-in_progress { background: #fff3e0; color: #e65100; }
+.status-submitted { background: #e8f5e9; color: #2e7d32; }
+
+/* Token text */
+.token-text {
+  font-family: "SF Mono", "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 14px;
+  color: var(--primary);
+  background: var(--primary-light, #eef0ff);
+  padding: 3px 10px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+}
+
+/* Link text */
+.link-text {
+  font-size: 12px;
+  color: var(--primary);
+  word-break: break-all;
+  max-width: 200px;
+  display: inline-block;
+}
+
+/* Screenshot thumbnail */
+.screenshot-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+/* Image viewer modal */
+.img-viewer-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.img-viewer-overlay.show { display: flex; }
+
+.img-viewer-overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 8px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: #2e7d32;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  z-index: 3000;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--text-light);
+  font-size: 14px;
+}
+
+/* Confirm dialog */
+.confirm-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1500;
+  justify-content: center;
+  align-items: center;
+}
+
+.confirm-overlay.show { display: flex; }
+
+.confirm-box {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 28px 32px;
+  width: 380px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+
+.confirm-box p {
+  font-size: 15px;
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+
+.confirm-box .modal-actions { justify-content: center; }
+
+/* Tag selection styles */
+.tag-group { margin-bottom: 16px; }
+.tag-group-title { font-size: 13px; color: #636e72; margin-bottom: 8px; font-weight: 500; }
+.tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag-item {
+  display: inline-flex; align-items: center;
+  padding: 6px 14px; border-radius: 16px;
+  font-size: 13px; cursor: pointer; user-select: none;
+  transition: all 0.2s; border: 1px solid var(--border);
+  background: #f0f0f0; color: #636e72;
+}
+.tag-item.selected {
+  background: var(--primary); color: #fff; border-color: var(--primary);
+}
+.tag-item:hover { border-color: var(--primary); }
+
+/* Validation error */
+.field-error {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 4px;
+  display: none;
+}
+.field-error.show { display: block; }
+
+/* Inline edit inputs in question table */
+.inline-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+}
+.inline-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+}
+.inline-textarea {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 60px;
+  line-height: 1.5;
+  transition: border-color 0.2s;
+}
+.inline-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.15);
+}
+
+/* GitHub 配置面板 */
+.gh-config-panel {
+  background: var(--white);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+.gh-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+}
+.gh-config-header:hover {
+  background: #f8f9fa;
+}
+.gh-config-header-title {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.gh-config-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.gh-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.gh-status-dot.connected { background: #2e7d32; }
+.gh-status-dot.disconnected { background: #e74c3c; }
+.gh-status-dot.connecting { background: #f39c12; animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.gh-status-text {
+  font-size: 12px;
+  color: var(--text-light);
+}
+.gh-config-toggle {
+  font-size: 12px;
+  color: var(--text-light);
+  transition: transform 0.2s;
+}
+.gh-config-toggle.open {
+  transform: rotate(180deg);
+}
+.gh-config-body {
+  padding: 0 20px 20px;
+  display: none;
+}
+.gh-config-body.open {
+  display: block;
+}
+.gh-config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.gh-config-grid .form-group {
+  margin-bottom: 0;
+}
+.gh-config-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* 加载状态 */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255,255,255,0.85);
+  z-index: 2500;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+.loading-overlay.hidden { display: none; }
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid var(--border);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.loading-text {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* 未连接提示 */
+.not-connected-hint {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-light);
+}
+.not-connected-hint h2 {
+  font-size: 20px;
+  margin-bottom: 12px;
+  color: var(--text);
+}
+.not-connected-hint p {
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+</style>
+</head>
+<body>
+
+<!-- 加载状态 -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">加载中...</div>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-title">AI办公软件测评<br>管理平台（云端版）</div>
+  <div class="sidebar-nav">
+    <div class="nav-item active" data-page="questions">
+      <span class="nav-icon">📋</span>测评题目
+    </div>
+    <div class="nav-item" data-page="products">
+      <span class="nav-icon">💻</span>测评产品
+    </div>
+    <div class="nav-item" data-page="standards">
+      <span class="nav-icon">📏</span>测评标准
+    </div>
+    <div class="nav-item" data-page="evaluators">
+      <span class="nav-icon">👥</span>测评人员
+    </div>
+    <div class="nav-item" data-page="data">
+      <span class="nav-icon">📊</span>数据管理
+    </div>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main">
+
+  <!-- GitHub 配置面板 -->
+  <div class="gh-config-panel" id="gh-config-panel">
+    <div class="gh-config-header" onclick="toggleGhConfig()">
+      <div class="gh-config-header-title">
+        <span>☁️</span> GitHub 云端配置
+      </div>
+      <div class="gh-config-header-right">
+        <span class="gh-status-dot disconnected" id="gh-status-dot"></span>
+        <span class="gh-status-text" id="gh-status-text">未连接</span>
+        <span class="gh-config-toggle" id="gh-config-toggle">▼</span>
+      </div>
+    </div>
+    <div class="gh-config-body" id="gh-config-body">
+      <div class="gh-config-grid">
+        <div class="form-group">
+          <label>GitHub Owner（用户名/组织名）</label>
+          <input type="text" id="gh-owner" placeholder="如：octocat">
+        </div>
+        <div class="form-group">
+          <label>Repository（仓库名）</label>
+          <input type="text" id="gh-repo" placeholder="如：eval-data">
+        </div>
+        <div class="form-group">
+          <label>Personal Access Token</label>
+          <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+        </div>
+        <div class="form-group">
+          <label>Branch（分支）</label>
+          <input type="text" id="gh-branch" placeholder="main" value="main">
+        </div>
+      </div>
+      <div class="gh-config-actions">
+        <button class="btn btn-primary btn-sm" onclick="connectGithub()">连接</button>
+        <button class="btn btn-outline btn-sm" onclick="disconnectGithub()">断开</button>
+        <span id="gh-connect-msg" style="font-size:13px;color:var(--text-light)"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 未连接提示 -->
+  <div id="not-connected-hint" class="not-connected-hint" style="display:none">
+    <h2>尚未连接 GitHub</h2>
+    <p>请先在上方配置面板中填写 GitHub 信息并点击"连接"，<br>连接成功后即可使用云端数据管理功能。</p>
+  </div>
+
+  <!-- 测评题目 -->
+  <div id="page-questions" class="page active">
+    <div class="page-header">
+      <h1 class="page-title">测评题目</h1>
+    </div>
+
+    <div class="section">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>基础测评</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addBasicQuestion()">+ 新增题目</button>
+          <button class="btn btn-primary btn-sm" onclick="saveBasicQuestions()">保存</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:60px">序号</th><th style="width:100px">题目类型</th><th style="width:180px">题目名称</th><th>Prompt</th><th style="width:80px">操作</th></tr>
+          </thead>
+          <tbody id="basic-questions-body"></tbody>
+        </table>
+        <div id="basic-empty" class="empty-state" style="display:none">暂无基础测评题目</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title" style="display:flex;justify-content:space-between;align-items:center">
+        <span>多轮对话</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="addMultiStem()">+ 新增题干</button>
+          <button class="btn btn-primary btn-sm" onclick="saveMultiQuestions()">保存</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th style="width:60px">序号</th><th style="width:100px">题目类型</th><th style="width:160px">题目名称</th><th style="width:160px">轮次名称</th><th>Prompt</th><th style="width:140px">操作</th></tr>
+          </thead>
+          <tbody id="multi-questions-body"></tbody>
+        </table>
+        <div id="multi-empty" class="empty-state" style="display:none">暂无多轮对话题目</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 测评产品 -->
+  <div id="page-products" class="page">
+    <div class="page-header">
+      <h1 class="page-title">测评产品</h1>
+      <button class="btn btn-primary" onclick="openProductModal()">+ 新增产品</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th style="width:60px">序号</th><th>产品名称</th><th style="width:140px">操作</th></tr>
+        </thead>
+        <tbody id="products-body"></tbody>
+      </table>
+      <div id="products-empty" class="empty-state" style="display:none">暂无产品</div>
+    </div>
+  </div>
+
+  <!-- 测评标准 -->
+  <div id="page-standards" class="page">
+    <div class="page-header">
+      <h1 class="page-title">测评标准</h1>
+      <button class="btn btn-primary" onclick="saveAllStandards()">保存</button>
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-std-tab="basic" onclick="switchStandardTab('basic')">基础测评</div>
+      <div class="tab" data-std-tab="multi_round" onclick="switchStandardTab('multi_round')">多轮对话</div>
+    </div>
+    <div id="standards-basic" class="section">
+      <div class="std-toolbar">
+        <input type="text" id="new-dim-basic" placeholder="输入新维度名称" class="new-dim-input">
+        <button class="btn btn-primary btn-sm" onclick="addDimension('basic')">+ 添加维度</button>
+      </div>
+      <div class="std-list-wrap" id="std-table-basic"></div>
+    </div>
+    <div id="standards-multi_round" class="section" style="display:none">
+      <div class="std-toolbar">
+        <input type="text" id="new-dim-multi_round" placeholder="输入新维度名称" class="new-dim-input">
+        <button class="btn btn-primary btn-sm" onclick="addDimension('multi_round')">+ 添加维度</button>
+      </div>
+      <div class="std-list-wrap" id="std-table-multi_round"></div>
+    </div>
+  </div>
+
+  <!-- 测评人员 -->
+  <div id="page-evaluators" class="page">
+    <div class="page-header">
+      <h1 class="page-title">测评人员</h1>
+      <button class="btn btn-primary" onclick="openEvaluatorModal()">+ 新增人员</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>姓名</th><th>专属链接</th><th>状态</th><th style="width:220px">操作</th></tr>
+        </thead>
+        <tbody id="evaluators-body"></tbody>
+      </table>
+      <div id="evaluators-empty" class="empty-state" style="display:none">暂无测评人员</div>
+    </div>
+  </div>
+
+  <!-- 数据管理 -->
+  <div id="page-data" class="page">
+    <div class="page-header">
+      <h1 class="page-title">数据管理</h1>
+      <button class="btn btn-primary" onclick="exportCSV()">📥 导出CSV</button>
+    </div>
+    <div class="filter-bar">
+      <label>按测评人：</label>
+      <select id="filter-evaluator" onchange="renderDataPage()">
+        <option value="">全部</option>
+      </select>
+      <label>按产品：</label>
+      <select id="filter-product" onchange="renderDataPage()">
+        <option value="">全部</option>
+      </select>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>测评人</th><th>题目大类</th><th>题目名称</th><th>产品名称</th>
+            <th>维度评分</th><th>链接</th><th>备注</th><th>截图</th>
+          </tr>
+        </thead>
+        <tbody id="data-body"></tbody>
+      </table>
+      <div id="data-empty" class="empty-state" style="display:none">暂无已提交的测评数据</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Product Modal -->
+<div class="modal-overlay" id="product-modal">
+  <div class="modal">
+    <div class="modal-title" id="product-modal-title">新增产品</div>
+    <div class="form-group">
+      <label>产品名称</label>
+      <input type="text" id="p-name" placeholder="请输入产品名称">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('product-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveProduct()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Evaluator Modal -->
+<div class="modal-overlay" id="evaluator-modal">
+  <div class="modal" style="width:600px">
+    <div class="modal-title" id="evaluator-modal-title">新增测评人员</div>
+    <div class="form-group">
+      <label>姓名</label>
+      <input type="text" id="e-name" placeholder="请输入姓名">
+    </div>
+    <div class="form-group">
+      <label>选择测评题目 <span style="font-weight:400;color:var(--text-light)">(至少选择1个)</span></label>
+      <div id="e-questions"></div>
+      <div class="field-error" id="e-questions-error">请至少选择1个测评题目</div>
+    </div>
+    <div class="form-group">
+      <label>选择测评产品 <span style="font-weight:400;color:var(--text-light)">(至少选择1个)</span></label>
+      <div id="e-products"></div>
+      <div class="field-error" id="e-products-error">请至少选择1个测评产品</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeModal('evaluator-modal')">取消</button>
+      <button class="btn btn-primary" onclick="saveEvaluator()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirm-dialog">
+  <div class="confirm-box">
+    <p id="confirm-msg">确认删除？</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">取消</button>
+      <button class="btn btn-danger" id="confirm-ok">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image Viewer -->
+<div class="img-viewer-overlay" id="img-viewer" onclick="this.classList.remove('show')">
+  <img id="img-viewer-src" src="" alt="截图预览">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============ GitHub 配置与 API ============
+let GH = { owner: '', repo: '', token: '', branch: 'main' };
+let ghShaCache = {};
+let ghConnected = false;
+
+// 内存中的配置缓存
+let configCache = null;
+
+function loadGhConfig() {
+  try {
+    const saved = localStorage.getItem('gh_config');
+    if (saved) GH = JSON.parse(saved);
+  } catch {}
+}
+
+function saveGhConfig() {
+  localStorage.setItem('gh_config', JSON.stringify(GH));
+}
+
+async function githubApi(method, path, body) {
+  const url = 'https://api.github.com/repos/' + GH.owner + '/' + GH.repo + '/contents/' + path;
+  const headers = {
+    'Authorization': 'token ' + GH.token,
+    'Accept': 'application/vnd.github.v3+json',
+    'Content-Type': 'application/json'
+  };
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url + (method === 'GET' ? '?ref=' + GH.branch + '&t=' + Date.now() : ''), opts);
+  return res;
+}
+
+async function githubRead(path) {
+  const res = await githubApi('GET', path);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('读取失败: ' + res.status);
+  const data = await res.json();
+  ghShaCache[path] = data.sha;
+  return JSON.parse(decodeURIComponent(escape(atob(data.content.replace(/\n/g, '')))));
+}
+
+async function githubWrite(path, data, message, maxRetry) {
+  maxRetry = maxRetry || 3;
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+  for (let i = 0; i < maxRetry; i++) {
+    // 获取最新 SHA
+    try {
+      const res = await githubApi('GET', path);
+      if (res.status === 404) {
+        ghShaCache[path] = null;
+      } else if (res.ok) {
+        const fileData = await res.json();
+        ghShaCache[path] = fileData.sha;
+      }
+    } catch {}
+
+    const body = {
+      message: message || 'update ' + path,
+      content: content,
+      branch: GH.branch
+    };
+    if (ghShaCache[path]) body.sha = ghShaCache[path];
+
+    const res = await githubApi('PUT', path, body);
+    if (res.ok) {
+      const result = await res.json();
+      ghShaCache[path] = result.content.sha;
+      return true;
+    }
+    if (res.status === 409) continue; // 冲突重试
+    const err = await res.json().catch(function() { return {}; });
+    throw new Error(err.message || '写入失败');
+  }
+  throw new Error('多次重试仍冲突');
+}
+
+async function githubDelete(path, message) {
+  // 先获取 SHA
+  try {
+    const res = await githubApi('GET', path);
+    if (res.status === 404) return true;
+    if (!res.ok) throw new Error('获取文件信息失败');
+    const data = await res.json();
+    const deleteRes = await githubApi('DELETE', path, {
+      message: message || 'delete ' + path,
+      sha: data.sha,
+      branch: GH.branch
+    });
+    if (deleteRes.ok) {
+      delete ghShaCache[path];
+      return true;
+    }
+    throw new Error('删除失败');
+  } catch (e) {
+    throw e;
+  }
+}
+
+// ============ 配置数据读写 ============
+
+async function loadConfig() {
+  if (configCache) return configCache;
+  const config = await githubRead('data/config.json');
+  if (!config) return { questions: [], products: [], standards: [], evaluators: [], links: [] };
+  configCache = config;
+  return config;
+}
+
+async function saveConfig(config) {
+  configCache = config;
+  await githubWrite('data/config.json', config, '更新配置');
+}
+
+async function loadResult(token) {
+  return await githubRead('data/results/' + token + '.json');
+}
+
+async function saveResult(token, data) {
+  await githubWrite('data/results/' + token + '.json', data, '更新测评结果');
+}
+
+async function deleteResult(token) {
+  await githubDelete('data/results/' + token + '.json', '删除测评结果');
+}
+
+// ============ GitHub 配置面板 ============
+
+function toggleGhConfig() {
+  const body = document.getElementById('gh-config-body');
+  const toggle = document.getElementById('gh-config-toggle');
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function updateGhStatus(status, text) {
+  const dot = document.getElementById('gh-status-dot');
+  const textEl = document.getElementById('gh-status-text');
+  dot.className = 'gh-status-dot ' + status;
+  textEl.textContent = text;
+}
+
+function fillGhForm() {
+  document.getElementById('gh-owner').value = GH.owner || '';
+  document.getElementById('gh-repo').value = GH.repo || '';
+  document.getElementById('gh-token').value = GH.token || '';
+  document.getElementById('gh-branch').value = GH.branch || 'main';
+}
+
+async function connectGithub() {
+  const owner = document.getElementById('gh-owner').value.trim();
+  const repo = document.getElementById('gh-repo').value.trim();
+  const token = document.getElementById('gh-token').value.trim();
+  const branch = document.getElementById('gh-branch').value.trim() || 'main';
+
+  if (!owner || !repo || !token) {
+    showToast('请填写完整的 GitHub 配置信息');
+    return;
+  }
+
+  GH = { owner, repo, token, branch };
+  saveGhConfig();
+
+  updateGhStatus('connecting', '连接中...');
+  document.getElementById('gh-connect-msg').textContent = '';
+
+  try {
+    // 尝试读取配置文件来验证连接
+    const config = await githubRead('data/config.json');
+    if (config) {
+      configCache = config;
+    } else {
+      // 仓库连接成功但还没有配置文件，初始化空配置
+      configCache = { questions: [], products: [], standards: [], evaluators: [], links: [] };
+    }
+    ghConnected = true;
+    updateGhStatus('connected', '已连接');
+    document.getElementById('gh-connect-msg').textContent = '连接成功！';
+    document.getElementById('gh-connect-msg').style.color = '#2e7d32';
+    document.getElementById('not-connected-hint').style.display = 'none';
+
+    // 显示主内容
+    showMainContent();
+
+    // 加载数据
+    await init();
+  } catch (e) {
+    ghConnected = false;
+    updateGhStatus('disconnected', '连接失败');
+    document.getElementById('gh-connect-msg').textContent = '连接失败: ' + e.message;
+    document.getElementById('gh-connect-msg').style.color = '#e74c3c';
+    showToast('GitHub 连接失败: ' + e.message);
+  }
+}
+
+function disconnectGithub() {
+  ghConnected = false;
+  configCache = null;
+  ghShaCache = {};
+  updateGhStatus('disconnected', '未连接');
+  document.getElementById('gh-connect-msg').textContent = '';
+  document.getElementById('not-connected-hint').style.display = '';
+  hideMainContent();
+}
+
+function showMainContent() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = '');
+  // 恢复当前活跃页面
+  const activePage = document.querySelector('.nav-item.active');
+  if (activePage) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + activePage.dataset.page).classList.add('active');
+  }
+}
+
+function hideMainContent() {
+  document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+}
+
+// ============ 加载状态 ============
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || '加载中...';
+  document.getElementById('loading-overlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  document.getElementById('loading-overlay').classList.add('hidden');
+}
+
+// ============ Utility ============
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+function genToken() {
+  return Math.random().toString(36).slice(2, 8);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+let confirmCallback = null;
+function showConfirm(msg, cb) {
+  document.getElementById('confirm-msg').textContent = msg;
+  confirmCallback = cb;
+  openModal('confirm-dialog');
+}
+
+function closeConfirm() {
+  closeModal('confirm-dialog');
+  confirmCallback = null;
+}
+
+document.getElementById('confirm-ok').onclick = function() {
+  if (confirmCallback) confirmCallback();
+  closeConfirm();
+};
+
+function escHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str || '';
+  return d.innerHTML;
+}
+
+// ============ Navigation ============
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', async function() {
+    if (!ghConnected) return;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + this.dataset.page).classList.add('active');
+    const page = this.dataset.page;
+    showLoading();
+    try {
+      if (page === 'questions') await renderQuestions();
+      else if (page === 'products') await renderProducts();
+      else if (page === 'standards') await renderStandards();
+      else if (page === 'evaluators') await renderEvaluators();
+      else if (page === 'data') await renderDataPage();
+    } catch (e) {
+      showToast('加载失败: ' + e.message);
+    }
+    hideLoading();
+  });
+});
+
+// ============ 测评题目 ============
+
+async function renderQuestions() {
+  const config = await loadConfig();
+  const questions = config.questions || [];
+  const basicQs = questions.filter(q => q.category === 'basic').sort((a, b) => a.order - b.order);
+  const multiStems = questions.filter(q => q.category === 'multi_round' && q.isStem).sort((a, b) => a.order - b.order);
+
+  // Basic inline table
+  const basicBody = document.getElementById('basic-questions-body');
+  const basicEmpty = document.getElementById('basic-empty');
+  if (basicQs.length === 0) {
+    basicBody.innerHTML = '';
+    basicEmpty.style.display = '';
+  } else {
+    basicEmpty.style.display = 'none';
+    basicBody.innerHTML = basicQs.map((q, i) => `
+      <tr data-qid="${q.id}">
+        <td>${i + 1}</td>
+        <td>基础测评</td>
+        <td><input type="text" class="inline-input" data-field="name" value="${escHtml(q.name)}" placeholder="题目名称"></td>
+        <td><textarea class="inline-textarea" data-field="prompt" placeholder="Prompt文本" style="min-height:60px">${escHtml(q.prompt || '')}</textarea></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${q.id}')">删除</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Multi-round inline table
+  const multiBody = document.getElementById('multi-questions-body');
+  const multiEmpty = document.getElementById('multi-empty');
+  if (multiStems.length === 0) {
+    multiBody.innerHTML = '';
+    multiEmpty.style.display = '';
+  } else {
+    multiEmpty.style.display = 'none';
+    let html = '';
+    let globalIdx = 0;
+    multiStems.forEach((stem, si) => {
+      globalIdx++;
+      html += `<tr data-qid="${stem.id}">
+        <td>${globalIdx}</td>
+        <td>原始题干</td>
+        <td><input type="text" class="inline-input" data-field="name" value="${escHtml(stem.name)}" placeholder="题目名称"></td>
+        <td></td>
+        <td><textarea class="inline-textarea" data-field="prompt" placeholder="题干描述（可选）" style="min-height:60px">${escHtml(stem.prompt || '')}</textarea></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm" onclick="addMultiRound('${stem.id}')">+ 新增轮次</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${stem.id}')">删除</button>
+          </div>
+        </td>
+      </tr>`;
+      const rounds = questions.filter(q => q.category === 'multi_round' && !q.isStem && q.stemId === stem.id)
+        .sort((a, b) => a.roundIndex - b.roundIndex);
+      rounds.forEach(r => {
+        globalIdx++;
+        html += `<tr data-qid="${r.id}" style="background:#fafbfc">
+          <td style="padding-left:40px">${globalIdx}</td>
+          <td style="padding-left:40px">轮次题目</td>
+          <td style="padding-left:40px"><input type="text" class="inline-input" data-field="stemName" value="${escHtml(stem.name)}" readonly style="background:#f0f0f0;color:var(--text-light)"></td>
+          <td style="padding-left:40px"><input type="text" class="inline-input" data-field="roundAction" value="${escHtml(r.roundAction || '')}" placeholder="轮次名称"></td>
+          <td style="padding-left:40px"><textarea class="inline-textarea" data-field="prompt" placeholder="Prompt文本" style="min-height:60px">${escHtml(r.prompt || '')}</textarea></td>
+          <td style="padding-left:40px">
+            <div class="actions">
+              <button class="btn btn-danger btn-sm" onclick="deleteQuestion('${r.id}')">删除</button>
+            </div>
+          </td>
+        </tr>`;
+      });
+    });
+    multiBody.innerHTML = html;
+  }
+}
+
+async function addBasicQuestion() {
+  showLoading('添加题目...');
+  try {
+    const config = await loadConfig();
+    const questions = config.questions || [];
+    const basicQs = questions.filter(q => q.category === 'basic');
+    questions.push({
+      id: 'q_' + genId(),
+      category: 'basic',
+      name: '',
+      prompt: '',
+      order: basicQs.length + 1,
+      isStem: false,
+      stemId: null,
+      roundIndex: null,
+      roundAction: null
+    });
+    config.questions = questions;
+    await saveConfig(config);
+    await renderQuestions();
+    // Focus the new name input
+    const rows = document.getElementById('basic-questions-body').querySelectorAll('tr');
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const nameInput = lastRow.querySelector('input[data-field="name"]');
+      if (nameInput) nameInput.focus();
+    }
+  } catch (e) {
+    showToast('操作失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function addMultiStem() {
+  showLoading('添加题干...');
+  try {
+    const config = await loadConfig();
+    const questions = config.questions || [];
+    const stems = questions.filter(q => q.category === 'multi_round' && q.isStem);
+    questions.push({
+      id: 'q_' + genId(),
+      category: 'multi_round',
+      name: '',
+      prompt: '',
+      order: stems.length + 1,
+      isStem: true,
+      stemId: null,
+      roundIndex: null,
+      roundAction: null
+    });
+    config.questions = questions;
+    await saveConfig(config);
+    await renderQuestions();
+    // Focus the new name input
+    const rows = document.getElementById('multi-questions-body').querySelectorAll('tr');
+    if (rows.length > 0) {
+      const lastRow = rows[rows.length - 1];
+      const nameInput = lastRow.querySelector('input[data-field="name"]');
+      if (nameInput) nameInput.focus();
+    }
+  } catch (e) {
+    showToast('操作失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function addMultiRound(stemId) {
+  showLoading('添加轮次...');
+  try {
+    const config = await loadConfig();
+    const questions = config.questions || [];
+    const siblingRounds = questions.filter(q => q.category === 'multi_round' && !q.isStem && q.stemId === stemId);
+    questions.push({
+      id: 'q_' + genId(),
+      category: 'multi_round',
+      name: '',
+      prompt: '',
+      order: 0,
+      isStem: false,
+      stemId: stemId,
+      roundIndex: siblingRounds.length + 1,
+      roundAction: ''
+    });
+    config.questions = questions;
+    await saveConfig(config);
+    await renderQuestions();
+  } catch (e) {
+    showToast('操作失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function saveBasicQuestions() {
+  showLoading('保存中...');
+  try {
+    const config = await loadConfig();
+    let questions = config.questions || [];
+
+    // Save basic questions from inline inputs
+    document.querySelectorAll('#basic-questions-body tr[data-qid]').forEach(row => {
+      const qid = row.dataset.qid;
+      const q = questions.find(x => x.id === qid);
+      if (!q) return;
+      const nameInput = row.querySelector('input[data-field="name"]');
+      const promptTA = row.querySelector('textarea[data-field="prompt"]');
+      if (nameInput) q.name = nameInput.value.trim();
+      if (promptTA) q.prompt = promptTA.value;
+    });
+
+    // Re-index orders
+    const basicQs = questions.filter(q => q.category === 'basic');
+    basicQs.sort((a, b) => a.order - b.order);
+    basicQs.forEach((q, i) => q.order = i + 1);
+
+    config.questions = questions;
+    await saveConfig(config);
+    await renderQuestions();
+    showToast('基础测评已保存');
+  } catch (e) {
+    showToast('保存失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function saveMultiQuestions() {
+  showLoading('保存中...');
+  try {
+    const config = await loadConfig();
+    let questions = config.questions || [];
+
+    // Save multi-round questions from inline inputs
+    document.querySelectorAll('#multi-questions-body tr[data-qid]').forEach(row => {
+      const qid = row.dataset.qid;
+      const q = questions.find(x => x.id === qid);
+      if (!q) return;
+      const nameInput = row.querySelector('input[data-field="name"]');
+      const roundActionInput = row.querySelector('input[data-field="roundAction"]');
+      const promptTA = row.querySelector('textarea[data-field="prompt"]');
+      if (nameInput && !nameInput.readOnly) q.name = nameInput.value.trim();
+      if (roundActionInput) q.roundAction = roundActionInput.value.trim();
+      if (promptTA) q.prompt = promptTA.value;
+    });
+
+    // Re-index orders
+    const multiStems = questions.filter(q => q.category === 'multi_round' && q.isStem);
+    multiStems.sort((a, b) => a.order - b.order);
+    multiStems.forEach((stem, i) => {
+      stem.order = i + 1;
+      const rounds = questions.filter(q => q.category === 'multi_round' && !q.isStem && q.stemId === stem.id);
+      rounds.sort((a, b) => a.roundIndex - b.roundIndex);
+      rounds.forEach((r, ri) => r.roundIndex = ri + 1);
+    });
+
+    config.questions = questions;
+    await saveConfig(config);
+    await renderQuestions();
+    showToast('多轮对话已保存');
+  } catch (e) {
+    showToast('保存失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function deleteQuestion(id) {
+  const config = await loadConfig();
+  const questions = config.questions || [];
+  const q = questions.find(x => x.id === id);
+  if (!q) return;
+
+  let msg = `确认删除该题目？`;
+  if (q.isStem) {
+    const childCount = questions.filter(x => x.category === 'multi_round' && !x.isStem && x.stemId === id).length;
+    if (childCount > 0) {
+      msg = `该题干下有 ${childCount} 个轮次题，将一并删除，确认？`;
+    }
+  }
+
+  showConfirm(msg, async () => {
+    showLoading('删除中...');
+    try {
+      const config = await loadConfig();
+      let questions = config.questions || [];
+      if (q.isStem) {
+        questions = questions.filter(x => !(x.stemId === id && x.category === 'multi_round' && !x.isStem));
+      }
+      questions = questions.filter(x => x.id !== id);
+      config.questions = questions;
+      await saveConfig(config);
+      await renderQuestions();
+      showToast('已删除');
+    } catch (e) {
+      showToast('删除失败: ' + e.message);
+    }
+    hideLoading();
+  });
+}
+
+// ============ 测评产品 ============
+let editingProductId = null;
+
+async function renderProducts() {
+  const config = await loadConfig();
+  const products = (config.products || []).sort((a, b) => a.order - b.order);
+  const body = document.getElementById('products-body');
+  const empty = document.getElementById('products-empty');
+  if (products.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    body.innerHTML = products.map((p, i) => `
+      <tr>
+        <td>${i + 1}</td>
+        <td>${escHtml(p.name)}</td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm" onclick="editProduct('${p.id}')">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">删除</button>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+}
+
+async function openProductModal(data) {
+  editingProductId = null;
+  document.getElementById('product-modal-title').textContent = '新增产品';
+  document.getElementById('p-name').value = '';
+  if (data) {
+    editingProductId = data.id;
+    document.getElementById('product-modal-title').textContent = '编辑产品';
+    document.getElementById('p-name').value = data.name;
+  }
+  openModal('product-modal');
+}
+
+async function editProduct(id) {
+  const config = await loadConfig();
+  const products = config.products || [];
+  const p = products.find(x => x.id === id);
+  if (p) openProductModal(p);
+}
+
+async function saveProduct() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { showToast('请输入产品名称'); return; }
+
+  showLoading('保存中...');
+  try {
+    const config = await loadConfig();
+    let products = config.products || [];
+    if (editingProductId) {
+      const p = products.find(x => x.id === editingProductId);
+      if (p) { p.name = name; }
+    } else {
+      products.push({ id: 'p_' + genId(), name, order: products.length + 1 });
+    }
+    config.products = products;
+    await saveConfig(config);
+    closeModal('product-modal');
+    await renderProducts();
+    showToast('保存成功');
+  } catch (e) {
+    showToast('保存失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function deleteProduct(id) {
+  const config = await loadConfig();
+  const products = config.products || [];
+  const p = products.find(x => x.id === id);
+  showConfirm(`确认删除产品「${p ? p.name : ''}」？`, async () => {
+    showLoading('删除中...');
+    try {
+      const config = await loadConfig();
+      let products = config.products || [];
+      products = products.filter(x => x.id !== id);
+      config.products = products;
+      await saveConfig(config);
+      await renderProducts();
+      showToast('已删除');
+    } catch (e) {
+      showToast('删除失败: ' + e.message);
+    }
+    hideLoading();
+  });
+}
+
+// ============ 测评标准 ============
+let currentStdTab = 'basic';
+
+function switchStandardTab(tab) {
+  currentStdTab = tab;
+  document.querySelectorAll('[data-std-tab]').forEach(t => t.classList.toggle('active', t.dataset.stdTab === tab));
+  document.getElementById('standards-basic').style.display = tab === 'basic' ? '' : 'none';
+  document.getElementById('standards-multi_round').style.display = tab === 'multi_round' ? '' : 'none';
+}
+
+function getDimensions(standards, cat) {
+  const dims = [];
+  const seen = new Set();
+  (standards || []).filter(s => s.category === cat).forEach(s => {
+    if (!seen.has(s.dimension)) {
+      seen.add(s.dimension);
+      dims.push(s.dimension);
+    }
+  });
+  return dims;
+}
+
+// Migrate old score-based data to new format
+function migrateStandardsIfNeeded(standards) {
+  const hasOldFormat = (standards || []).some(s => s.score !== undefined);
+  if (!hasOldFormat) return standards;
+
+  // Group old records by category+dimension, merge into single records
+  const grouped = {};
+  (standards || []).forEach(s => {
+    const key = s.category + '::' + s.dimension;
+    if (!grouped[key]) {
+      grouped[key] = { category: s.category, dimension: s.dimension, lines: [] };
+    }
+    if (s.score !== undefined && s.content) {
+      grouped[key].lines.push(s.score + '-' + s.content);
+    } else if (s.content) {
+      grouped[key].lines.push(s.content);
+    }
+  });
+
+  return Object.values(grouped).map(g => ({
+    id: 's_' + genId(),
+    category: g.category,
+    dimension: g.dimension,
+    content: g.lines.join('\n')
+  }));
+}
+
+async function renderStandards() {
+  const config = await loadConfig();
+  let standards = config.standards || [];
+  standards = migrateStandardsIfNeeded(standards);
+  if (standards !== config.standards) {
+    config.standards = standards;
+    // 不在此处保存，仅更新缓存
+    configCache = config;
+  }
+
+  ['basic', 'multi_round'].forEach(cat => {
+    const container = document.getElementById('std-table-' + cat);
+    const dimensions = getDimensions(standards, cat);
+
+    if (dimensions.length === 0) {
+      container.innerHTML = '<div class="std-empty-hint">暂无维度，请在上方输入维度名称并点击"添加维度"</div>';
+      return;
+    }
+
+    let html = '';
+    dimensions.forEach(dim => {
+      const item = standards.find(s => s.dimension === dim && s.category === cat);
+      const content = item ? (item.content || '') : '';
+      const itemId = item ? item.id : '';
+      html += `<div class="std-dim-row" data-cat="${cat}" data-dim="${escHtml(dim)}">
+        <div class="std-dim-name">
+          <span class="dim-name-text" id="dim-name-${cat}-${escHtml(dim).replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '_')}">${escHtml(dim)}</span>
+        </div>
+        <div class="std-dim-content">
+          <textarea data-cat="${cat}" data-dim="${escHtml(dim)}" data-id="${itemId}" placeholder="输入标准正文，如：0-功能缺失&#10;1-基础功能可用&#10;2-功能完善&#10;3-超出预期">${escHtml(content)}</textarea>
+        </div>
+        <div class="std-dim-actions">
+          <button class="btn btn-primary btn-sm" onclick="editDimension('${cat}','${escHtml(dim).replace(/'/g, "\\'")}')">编辑</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteDimension('${cat}','${escHtml(dim).replace(/'/g, "\\'")}')">删除</button>
+        </div>
+      </div>`;
+    });
+    container.innerHTML = html;
+  });
+}
+
+async function addDimension(cat) {
+  const input = document.getElementById('new-dim-' + cat);
+  const dim = input.value.trim();
+  if (!dim) { showToast('请输入维度名称'); return; }
+
+  const config = await loadConfig();
+  const standards = config.standards || [];
+  const existing = getDimensions(standards, cat);
+  if (existing.includes(dim)) { showToast('该维度已存在'); return; }
+
+  showLoading('添加维度...');
+  try {
+    standards.push({
+      id: 's_' + genId(),
+      category: cat,
+      dimension: dim,
+      content: ''
+    });
+    config.standards = standards;
+    await saveConfig(config);
+    input.value = '';
+    await renderStandards();
+    showToast('维度已添加');
+  } catch (e) {
+    showToast('添加失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function deleteDimension(cat, dim) {
+  showConfirm(`确认删除维度「${dim}」？`, async () => {
+    showLoading('删除中...');
+    try {
+      const config = await loadConfig();
+      let standards = config.standards || [];
+      standards = standards.filter(s => !(s.category === cat && s.dimension === dim));
+      config.standards = standards;
+      await saveConfig(config);
+      await renderStandards();
+      showToast('维度已删除');
+    } catch (e) {
+      showToast('删除失败: ' + e.message);
+    }
+    hideLoading();
+  });
+}
+
+async function editDimension(cat, dim) {
+  const safeId = 'dim-name-' + cat + '-' + dim.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '_');
+  const nameEl = document.getElementById(safeId);
+  if (!nameEl) return;
+
+  // If already editing, save
+  if (nameEl.tagName === 'INPUT') {
+    await saveDimensionName(cat, dim, nameEl.value.trim());
+    return;
+  }
+
+  // Replace text with input
+  const currentName = nameEl.textContent;
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'dim-name-input';
+  input.value = currentName;
+  input.id = safeId;
+  nameEl.replaceWith(input);
+  input.focus();
+  input.select();
+
+  // Change the edit button text to "保存"
+  const row = input.closest('.std-dim-row');
+  const editBtn = row.querySelector('.btn-primary');
+  if (editBtn) editBtn.textContent = '保存';
+
+  // Save on Enter, cancel on Escape
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveDimensionName(cat, dim, this.value.trim());
+    } else if (e.key === 'Escape') {
+      renderStandards();
+    }
+  });
+
+  input.addEventListener('blur', function() {
+    // Small delay to allow button click to process
+    setTimeout(() => {
+      const el = document.getElementById(safeId);
+      if (el && el.tagName === 'INPUT') {
+        saveDimensionName(cat, dim, this.value.trim());
+      }
+    }, 150);
+  });
+}
+
+async function saveDimensionName(cat, oldDim, newDim) {
+  if (!newDim) { await renderStandards(); showToast('维度名称不能为空'); return; }
+  if (newDim === oldDim) { await renderStandards(); return; }
+
+  const config = await loadConfig();
+  const standards = config.standards || [];
+  const existing = getDimensions(standards, cat);
+  if (existing.includes(newDim)) { await renderStandards(); showToast('该维度名称已存在'); return; }
+
+  standards.forEach(s => {
+    if (s.category === cat && s.dimension === oldDim) {
+      s.dimension = newDim;
+    }
+  });
+  config.standards = standards;
+  await saveConfig(config);
+  await renderStandards();
+  showToast('维度已重命名');
+}
+
+async function saveAllStandards() {
+  showLoading('保存中...');
+  try {
+    const config = await loadConfig();
+    let standards = migrateStandardsIfNeeded(config.standards || []);
+    config.standards = standards;
+
+    // Collect all textarea values
+    document.querySelectorAll('.std-list-wrap textarea[data-cat]').forEach(ta => {
+      const cat = ta.dataset.cat;
+      const dim = ta.dataset.dim;
+      const id = ta.dataset.id;
+      const content = ta.value;
+
+      if (id) {
+        const existing = standards.find(s => s.id === id);
+        if (existing) {
+          existing.content = content;
+        }
+      } else {
+        // New entry without id, find by cat+dim or create
+        const existing = standards.find(s => s.category === cat && s.dimension === dim);
+        if (existing) {
+          existing.content = content;
+        } else {
+          standards.push({
+            id: 's_' + genId(),
+            category: cat,
+            dimension: dim,
+            content
+          });
+        }
+      }
+    });
+
+    config.standards = standards;
+    await saveConfig(config);
+    showToast('保存成功');
+  } catch (e) {
+    showToast('保存失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+// ============ 测评人员 ============
+let editingEvaluatorId = null;
+
+async function renderEvaluators() {
+  const config = await loadConfig();
+  const evaluators = config.evaluators || [];
+  const links = config.links || [];
+  const body = document.getElementById('evaluators-body');
+  const empty = document.getElementById('evaluators-empty');
+
+  if (evaluators.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    // 需要异步获取每个 evaluator 的结果状态
+    body.innerHTML = evaluators.map(e => {
+      const link = links.find(l => l.evaluatorId === e.id);
+      return `<tr data-evalid="${e.id}" data-token="${link ? link.token : ''}">
+        <td>${escHtml(e.name)}</td>
+        <td><span class="link-text">${link ? 'eval-github.html?token=' + link.token : ''}</span></td>
+        <td><span class="status-badge status-pending">加载中...</span></td>
+        <td>
+          <div class="actions">
+            <button class="btn btn-primary btn-sm" onclick="editEvaluator('${e.id}')">编辑</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteEvaluator('${e.id}')">删除</button>
+            <button class="btn btn-outline btn-sm" onclick="copyLink('${e.id}')">复制链接</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    // 异步加载每个 evaluator 的状态
+    for (const e of evaluators) {
+      const link = links.find(l => l.evaluatorId === e.id);
+      if (!link) continue;
+      let status = 'pending';
+      let statusLabel = '待测评';
+      let statusClass = 'status-pending';
+      try {
+        const result = await loadResult(link.token);
+        if (result) {
+          if (result.submittedAt) {
+            status = 'submitted';
+            statusLabel = '已提交';
+            statusClass = 'status-submitted';
+          } else {
+            status = 'in_progress';
+            statusLabel = '进行中';
+            statusClass = 'status-in_progress';
+          }
+        }
+      } catch {}
+      const row = body.querySelector(`tr[data-evalid="${e.id}"]`);
+      if (row) {
+        const badge = row.querySelector('.status-badge');
+        badge.className = 'status-badge ' + statusClass;
+        badge.textContent = statusLabel;
+      }
+    }
+  }
+}
+
+async function buildQuestionTags(selectedIds) {
+  const config = await loadConfig();
+  const questions = config.questions || [];
+  const container = document.getElementById('e-questions');
+
+  // 基础测评题目
+  const basicQs = questions.filter(q => q.category === 'basic').sort((a, b) => a.order - b.order);
+  // 多轮对话题干（只显示题干，不显示轮次）
+  const multiStems = questions.filter(q => q.category === 'multi_round' && q.isStem).sort((a, b) => a.order - b.order);
+
+  let html = '';
+
+  if (basicQs.length > 0) {
+    html += '<div class="tag-group">';
+    html += '<div class="tag-group-title">基础测评</div>';
+    html += '<div class="tag-list">';
+    basicQs.forEach(q => {
+      const sel = selectedIds.includes(q.id) ? ' selected' : '';
+      html += `<span class="tag-item${sel}" data-id="${q.id}">${escHtml(q.name || '(未命名)')}</span>`;
+    });
+    html += '</div></div>';
+  }
+
+  if (multiStems.length > 0) {
+    html += '<div class="tag-group">';
+    html += '<div class="tag-group-title">多轮对话</div>';
+    html += '<div class="tag-list">';
+    multiStems.forEach(stem => {
+      const sel = selectedIds.includes(stem.id) ? ' selected' : '';
+      html += `<span class="tag-item${sel}" data-id="${stem.id}">${escHtml(stem.name || '(未命名)')}</span>`;
+    });
+    html += '</div></div>';
+  }
+
+  if (!html) {
+    html = '<span style="color:var(--text-light);font-size:13px">暂无题目，请先添加题目</span>';
+  }
+
+  container.innerHTML = html;
+
+  // Bind click events
+  container.querySelectorAll('.tag-item').forEach(tag => {
+    tag.addEventListener('click', function() {
+      this.classList.toggle('selected');
+      document.getElementById('e-questions-error').classList.remove('show');
+    });
+  });
+}
+
+async function buildProductTags(selectedIds) {
+  const config = await loadConfig();
+  const products = (config.products || []).sort((a, b) => a.order - b.order);
+  const container = document.getElementById('e-products');
+
+  if (products.length === 0) {
+    container.innerHTML = '<span style="color:var(--text-light);font-size:13px">暂无产品，请先添加产品</span>';
+    return;
+  }
+
+  let html = '<div class="tag-group"><div class="tag-list">';
+  products.forEach(p => {
+    const sel = selectedIds.includes(p.id) ? ' selected' : '';
+    html += `<span class="tag-item${sel}" data-id="${p.id}">${escHtml(p.name)}</span>`;
+  });
+  html += '</div></div>';
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.tag-item').forEach(tag => {
+    tag.addEventListener('click', function() {
+      this.classList.toggle('selected');
+      document.getElementById('e-products-error').classList.remove('show');
+    });
+  });
+}
+
+async function openEvaluatorModal(data) {
+  editingEvaluatorId = null;
+  document.getElementById('evaluator-modal-title').textContent = '新增测评人员';
+  document.getElementById('e-name').value = '';
+  document.getElementById('e-questions-error').classList.remove('show');
+  document.getElementById('e-products-error').classList.remove('show');
+
+  let selectedQuestionIds = [];
+  let selectedProductIds = [];
+
+  if (data) {
+    editingEvaluatorId = data.id;
+    document.getElementById('evaluator-modal-title').textContent = '编辑测评人员';
+    document.getElementById('e-name').value = data.name;
+    const config = await loadConfig();
+    const links = config.links || [];
+    const link = links.find(l => l.evaluatorId === data.id);
+    if (link) {
+      selectedProductIds = link.productIds || [];
+      selectedQuestionIds = link.questionIds || [];
+    }
+  }
+
+  await buildQuestionTags(selectedQuestionIds);
+  await buildProductTags(selectedProductIds);
+
+  openModal('evaluator-modal');
+}
+
+async function editEvaluator(id) {
+  const config = await loadConfig();
+  const evaluators = config.evaluators || [];
+  const e = evaluators.find(x => x.id === id);
+  if (e) openEvaluatorModal(e);
+}
+
+async function saveEvaluator() {
+  const name = document.getElementById('e-name').value.trim();
+  if (!name) { showToast('请输入姓名'); return; }
+
+  // Collect selected question IDs
+  const selectedQuestionIds = Array.from(document.querySelectorAll('#e-questions .tag-item.selected')).map(t => t.dataset.id);
+  if (selectedQuestionIds.length === 0) {
+    document.getElementById('e-questions-error').classList.add('show');
+    return;
+  }
+
+  // Collect selected product IDs
+  const selectedProductIds = Array.from(document.querySelectorAll('#e-products .tag-item.selected')).map(t => t.dataset.id);
+  if (selectedProductIds.length === 0) {
+    document.getElementById('e-products-error').classList.add('show');
+    return;
+  }
+
+  showLoading('保存中...');
+  try {
+    const config = await loadConfig();
+    let evaluators = config.evaluators || [];
+    let links = config.links || [];
+
+    if (editingEvaluatorId) {
+      const e = evaluators.find(x => x.id === editingEvaluatorId);
+      if (e) e.name = name;
+      const link = links.find(l => l.evaluatorId === editingEvaluatorId);
+      if (link) {
+        link.productIds = selectedProductIds;
+        link.questionIds = selectedQuestionIds;
+      }
+    } else {
+      const token = genToken();
+      const newId = 'e_' + genId();
+      evaluators.push({ id: newId, name, token });
+      links.push({
+        id: 'l_' + genId(),
+        evaluatorId: newId,
+        productIds: selectedProductIds,
+        questionIds: selectedQuestionIds,
+        token,
+        status: 'pending'
+      });
+    }
+
+    config.evaluators = evaluators;
+    config.links = links;
+    await saveConfig(config);
+    closeModal('evaluator-modal');
+    await renderEvaluators();
+    showToast('保存成功');
+  } catch (e) {
+    showToast('保存失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+async function deleteEvaluator(id) {
+  const config = await loadConfig();
+  const evaluators = config.evaluators || [];
+  const e = evaluators.find(x => x.id === id);
+  showConfirm(`确认删除测评人员「${e ? e.name : ''}」？`, async () => {
+    showLoading('删除中...');
+    try {
+      const config = await loadConfig();
+      let evaluators = config.evaluators || [];
+      let links = config.links || [];
+      const link = links.find(l => l.evaluatorId === id);
+      if (link) {
+        // 删除 GitHub 上的结果文件
+        try {
+          await deleteResult(link.token);
+        } catch {}
+      }
+      links = links.filter(l => l.evaluatorId !== id);
+      evaluators = evaluators.filter(x => x.id !== id);
+      config.evaluators = evaluators;
+      config.links = links;
+      await saveConfig(config);
+      await renderEvaluators();
+      showToast('已删除');
+    } catch (e) {
+      showToast('删除失败: ' + e.message);
+    }
+    hideLoading();
+  });
+}
+
+async function copyLink(evaluatorId) {
+  const config = await loadConfig();
+  const links = config.links || [];
+  const link = links.find(l => l.evaluatorId === evaluatorId);
+  if (!link) { showToast('未找到专属链接'); return; }
+  const baseUrl = window.location.origin + window.location.pathname.replace('admin-github.html', '');
+  const url = baseUrl + 'eval-github.html?token=' + link.token;
+  navigator.clipboard.writeText(url).then(() => {
+    showToast('链接已复制');
+  }).catch(() => {
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('链接已复制');
+  });
+}
+
+// ============ 数据管理 ============
+async function renderDataPage() {
+  const config = await loadConfig();
+  const evaluators = config.evaluators || [];
+  const products = config.products || [];
+  const questions = config.questions || [];
+  const links = config.links || [];
+  const standards = config.standards || [];
+
+  const filterEval = document.getElementById('filter-evaluator');
+  const filterProd = document.getElementById('filter-product');
+
+  const curEval = filterEval.value;
+  const curProd = filterProd.value;
+
+  filterEval.innerHTML = '<option value="">全部</option>' + evaluators.map(e => `<option value="${e.id}">${escHtml(e.name)}</option>`).join('');
+  filterProd.innerHTML = '<option value="">全部</option>' + products.map(p => `<option value="${p.id}">${escHtml(p.name)}</option>`).join('');
+
+  filterEval.value = curEval;
+  filterProd.value = curProd;
+
+  // 从 GitHub 读取所有结果数据
+  let allRows = [];
+  for (const link of links) {
+    try {
+      const result = await loadResult(link.token);
+      if (!result || !result.submittedAt) continue;
+      const evaluator = evaluators.find(e => e.id === link.evaluatorId);
+      (result.results || []).forEach(r => {
+        const question = questions.find(q => q.id === r.questionId);
+        const product = products.find(p => p.id === r.productId);
+        if (!question || !product) return;
+        if (question.isStem) return;
+        // 多轮对话的题目名称取题干名称
+        let questionName = question.name;
+        if (question.category === 'multi_round' && question.stemId) {
+          const stem = questions.find(q => q.id === question.stemId);
+          if (stem) questionName = stem.name;
+        }
+        allRows.push({
+          evaluatorId: link.evaluatorId,
+          evaluatorName: evaluator ? evaluator.name : '未知',
+          questionCategory: question.category === 'basic' ? '基础测评' : '多轮对话',
+          questionCategoryKey: question.category,
+          questionName: questionName,
+          productId: product.id,
+          productName: product.name,
+          scores: r.scores || {},
+          link: r.link || '',
+          note: r.note || '',
+          screenshots: r.screenshots || []
+        });
+      });
+    } catch {}
+  }
+
+  // Apply filters
+  if (curEval) {
+    allRows = allRows.filter(r => r.evaluatorId === curEval);
+  }
+  if (curProd) {
+    allRows = allRows.filter(r => r.productId === curProd);
+  }
+
+  const body = document.getElementById('data-body');
+  const empty = document.getElementById('data-empty');
+
+  if (allRows.length === 0) {
+    body.innerHTML = '';
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    body.innerHTML = allRows.map(r => {
+      const scores = r.scores;
+      // Build dimension score display - filter by category, match by dimension name
+      const catStandards = standards.filter(s => s.category === r.questionCategoryKey);
+      let scoreHtml = '';
+      if (catStandards.length > 0) {
+        scoreHtml = catStandards.map(std => {
+          const val = scores[std.dimension] !== undefined ? scores[std.dimension] : '-';
+          return `<span style="margin-right:8px;font-size:12px">${escHtml(std.dimension)}: ${val}</span>`;
+        }).join('');
+      } else {
+        scoreHtml = '-';
+      }
+
+      const screenshots = r.screenshots.map(img =>
+        `<img class="screenshot-thumb" src="${escHtml(img)}" onclick="viewImage('${escHtml(img).replace(/'/g, "\\'")}')" alt="截图">`
+      ).join('');
+      return `<tr>
+        <td>${escHtml(r.evaluatorName)}</td>
+        <td>${escHtml(r.questionCategory)}</td>
+        <td>${escHtml(r.questionName)}</td>
+        <td>${escHtml(r.productName)}</td>
+        <td>${scoreHtml}</td>
+        <td>${r.link ? `<a href="${escHtml(r.link)}" target="_blank" style="color:var(--primary)">查看</a>` : '-'}</td>
+        <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${escHtml(r.note)}">${escHtml(r.note) || '-'}</td>
+        <td>${screenshots || '-'}</td>
+      </tr>`;
+    }).join('');
+  }
+}
+
+function viewImage(src) {
+  document.getElementById('img-viewer-src').src = src;
+  document.getElementById('img-viewer').classList.add('show');
+}
+
+async function exportCSV() {
+  showLoading('导出中...');
+  try {
+    const config = await loadConfig();
+    const evaluators = config.evaluators || [];
+    const products = config.products || [];
+    const questions = config.questions || [];
+    const links = config.links || [];
+
+    let allRows = [];
+    for (const link of links) {
+      try {
+        const result = await loadResult(link.token);
+        if (!result || !result.submittedAt) continue;
+        const evaluator = evaluators.find(e => e.id === link.evaluatorId);
+        (result.results || []).forEach(r => {
+          const question = questions.find(q => q.id === r.questionId);
+          const product = products.find(p => p.id === r.productId);
+          if (!question || !product) return;
+          if (question.isStem) return;
+          // 多轮对话的题目名称取题干名称
+          let questionName = question.name;
+          if (question.category === 'multi_round' && question.stemId) {
+            const stem = questions.find(q => q.id === question.stemId);
+            if (stem) questionName = stem.name;
+          }
+          allRows.push({
+            evaluatorName: evaluator ? evaluator.name : '未知',
+            questionCategory: question.category === 'basic' ? '基础测评' : '多轮对话',
+            questionCategoryKey: question.category,
+            questionName: questionName,
+            productName: product.name,
+            scores: r.scores || {},
+            link: r.link || '',
+            note: r.note || ''
+          });
+        });
+      } catch {}
+    }
+
+    if (allRows.length === 0) {
+      showToast('暂无数据可导出');
+      hideLoading();
+      return;
+    }
+
+    // Collect all unique dimension names across all rows (scores keys are dimension names)
+    const allDimensionNames = new Set();
+    allRows.forEach(r => {
+      Object.keys(r.scores).forEach(k => allDimensionNames.add(k));
+    });
+
+    // Build dimension headers (use dimension names directly)
+    const dimHeaders = Array.from(allDimensionNames);
+
+    const BOM = '\uFEFF';
+    const headers = ['测评人', '题目大类', '题目名称', '产品名称', ...dimHeaders, '链接', '备注'];
+    const rows = allRows.map(r => {
+      const dimValues = Array.from(allDimensionNames).map(dim => r.scores[dim] !== undefined ? r.scores[dim] : '-');
+      return [
+        r.evaluatorName, r.questionCategory, r.questionName, r.productName,
+        ...dimValues,
+        r.link, r.note
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv = BOM + headers.join(',') + '\n' + rows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = '测评数据_' + new Date().toISOString().slice(0, 10) + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('导出成功');
+  } catch (e) {
+    showToast('导出失败: ' + e.message);
+  }
+  hideLoading();
+}
+
+// ============ Init ============
+async function init() {
+  await renderQuestions();
+  await renderProducts();
+  await renderStandards();
+  await renderEvaluators();
+  await renderDataPage();
+}
+
+// 页面启动
+(async function() {
+  loadGhConfig();
+  fillGhForm();
+
+  if (GH.owner && GH.repo && GH.token) {
+    // 有配置，尝试自动连接
+    updateGhStatus('connecting', '连接中...');
+    showLoading('正在连接 GitHub...');
+    try {
+      const config = await githubRead('data/config.json');
+      if (config) {
+        configCache = config;
+      } else {
+        configCache = { questions: [], products: [], standards: [], evaluators: [], links: [] };
+      }
+      ghConnected = true;
+      updateGhStatus('connected', '已连接');
+      document.getElementById('not-connected-hint').style.display = 'none';
+      await init();
+    } catch (e) {
+      ghConnected = false;
+      updateGhStatus('disconnected', '连接失败');
+      document.getElementById('not-connected-hint').style.display = '';
+      hideMainContent();
+      // 展开配置面板
+      document.getElementById('gh-config-body').classList.add('open');
+      document.getElementById('gh-config-toggle').classList.add('open');
+      showToast('GitHub 自动连接失败: ' + e.message);
+    }
+  } else {
+    // 没有配置，显示提示
+    ghConnected = false;
+    updateGhStatus('disconnected', '未配置');
+    document.getElementById('not-connected-hint').style.display = '';
+    hideMainContent();
+    // 展开配置面板
+    document.getElementById('gh-config-body').classList.add('open');
+    document.getElementById('gh-config-toggle').classList.add('open');
+  }
+
+  hideLoading();
+})();
+</script>
+</body>
+</html>
