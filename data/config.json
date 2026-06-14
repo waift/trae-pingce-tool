@@ -73,7 +73,14 @@
       "order": 3
     }
   ],
-  "standards": [],
+  "standards": [
+    {
+      "id": "s_mqdpxbsr9vwya9",
+      "category": "basic",
+      "dimension": "功能",
+      "content": ""
+    }
+  ],
   "evaluators": [],
   "links": []
 }
