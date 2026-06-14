@@ -56,7 +56,13 @@
       "roundAction": "轮2：改美术素材"
     }
   ],
-  "products": [],
+  "products": [
+    {
+      "id": "p_mqdpwbjixcynwl",
+      "name": "千问",
+      "order": 1
+    }
+  ],
   "standards": [],
   "evaluators": [],
   "links": []
